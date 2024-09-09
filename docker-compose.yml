@@ -7,8 +7,8 @@ services:
       environment:
         - POSTGRES_PASSWORD=postgresPasswword
         - POSTGRES_USER=nodeProdUser
-        - POSTGRES_DB=node_pretaa_testing
+        - POSTGRES_DB=node_db
       ports:
         - '5432:5432'
 
-      # postgresql://nodeProdUser:postgresPasswword@localhost:5432/node_pretaa_testing
+      # postgresql://nodeProdUser:postgresPasswword@localhost:5432/node_db

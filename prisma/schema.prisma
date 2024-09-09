@@ -7,36 +7,99 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// For mongo use atlas db 
-// datasource db {
-//   provider = "mongodb"
-//   url      = env("DATABASE_URL")
-// }
-
 model User {
-  id String @id @default(uuid()) @map("_id")
-  email                String     @unique
-  password             String
-  phoneNo              String
-  verificationToken    String?
-  userType             UserType
-  wrongPasswordAttempt Float?
-  lockoutTime          DateTime?
-  twoFactorAuthToken   String?
-  roleId               String?
-  // role                 Role       @relation(fields: [roleId], references: [id])
+  id       String  @id @default(uuid()) @map("_id")
+  email    String  @unique
+  password String?
+  phone_no String?
+  Team     Team?   @relation(fields: [teamId], references: [id])
+  teamId   String?
+
+  verification_token     String?
+  wrong_password_attempt Float?
+  lockout_time           DateTime?
+  is_locked              Boolean   @default(false)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Use the same relation names in the User model
+  assigneeAssets  Assets[] @relation(name: "AssigneeAssets") // Assets where the user is the assignee
+  createdByAssets Assets[] @relation(name: "CreatedByAssets") // Assets created by the user
 }
 
-// model Role {
-//   id String @id @default(uuid()) @map("_id")
-//   privieges   String[]
-//   name        String
-//   displayName String
-//   User        User[]
-// }
+model Team {
+  id          String  @id @default(uuid()) @map("_id")
+  name        String
+  description String?
+  members     User[]
 
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
 
-enum UserType {
-  CUSTOMER
-  OWNER
+model Assets {
+  id          String  @id @default(uuid()) @map("_id")
+  name        String
+  description String?
+
+  assignee_id String?
+  assignee    User?   @relation(name: "AssigneeAssets", fields: [assignee_id], references: [id]) // Named relation for assignee
+
+  status_id String?
+  status    AssetStatus? @relation(fields: [status_id], references: [id])
+
+  asset_type_id String?
+  asseType      AssetType? @relation(name: "AssetTypes", fields: [asset_type_id], references: [id])
+
+  createdById String
+  createdBy   User   @relation(name: "CreatedByAssets", fields: [createdById], references: [id]) // Named relation for createdBy
+
+  attachments String[]
+
+  assetHistory AssetHistory[] @relation(name: "AssetHistory")
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model AssetHistory {
+  id String @id @default(uuid()) @map("_id")
+
+  title       String
+  description String?
+  status_id   String
+  assignee_id String
+
+  asset_id String
+  history  Assets @relation(name: "AssetHistory", fields: [asset_id], references: [id])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model AssetStatus {
+  id          String  @id @default(uuid()) @map("_id")
+  name        String
+  description String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  Assets    Assets[]
+}
+
+model AssetType {
+  id          String  @id @default(uuid()) @map("_id")
+  name        String
+  description String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  assets    Assets[]  @relation(name: "AssetTypes")
 }
