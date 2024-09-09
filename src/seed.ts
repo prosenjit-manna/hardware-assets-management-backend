@@ -1,19 +1,24 @@
-import { PrismaClient, UserType } from '@prisma/client';
-import { faker } from '@faker-js/faker';
+import { PrismaClient } from '@prisma/client';
+import { userSeed } from './seed/user-seed';
+import { assetTypesSeed } from './seed/assets-seed';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  await prisma.user.create({
-    data: {
-      email: faker.internet.email(),
-      password: faker.internet.password(),
-      phoneNo: faker.phone.number(),
-      verificationToken: faker.string.uuid(),
-      userType: UserType.CUSTOMER,
-      roleId: faker.string.uuid(),
-    },
-  });
+  try {
+    await userSeed(prisma);
+  } catch (e) {
+    console.error(e);
+    process.exit(1);
+  }
+
+  try {
+    await assetTypesSeed(prisma);
+  } catch (e) {
+    console.error(e);
+    process.exit(1);
+  }
+
   await prisma.$disconnect();
 }
 
